@@ -88,13 +88,30 @@ ColorByAlt = {
 //         stale :    { h: 0, s: 0, l: +30 }
 // };
 
+// -- Display aircraft in color depending on their altitude
+ShowAltitudesByColor = true; // true or false
+// -- Display aircraft color legend
+ShowAircraftColorLegend = true; // true or false
+// Number of altitude zones displayed
+NumberOfAltitudeZones = 27;
+// Maximum altitude in meters.
+MaxAltitudeMeters = 13500;
+// Maximum altitude in feet.
+MaxAltitudeFeet = 40500;
 
-SiteCircles = true; // true to show circles (only shown if the center marker is shown)
-// In nautical miles or km (depending settings value 'Metric')
-SiteCirclesDistances = new Array(100,150,200);
+ShowSiteCircles = true; // true to show circles (only shown if the center marker is shown)
+ShowSiteCirclesLegend = true ; // true to show circle distance legend
+// Circle radius in nautical miles or km (depending settings value 'Metric')
+SiteCircle = [
+        { distance:  50, stroke: 1, color: "black" },
+        { distance: 100, stroke: 2, color: "green" },
+        { distance: 150, stroke: 1, color: "blue" },
+        { distance: 200, stroke: 2, color: "red" },
+        { distance: 250, stroke: 2, color: "magenta" }
+];
 
 // Show the clocks at the top of the righthand pane? You can disable the clocks if you want here
 ShowClocks = true;
 
 // Controls page title, righthand pane when nothing is selected
-PageName = "DUMP1090";
+PageName = "dump1090-mutability";

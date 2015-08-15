@@ -12,6 +12,7 @@
 		<script type="text/javascript" src="planeObject.js"></script>
 		<script type="text/javascript" src="formatter.js"></script>
 		<script type="text/javascript" src="script.js"></script>
+		<script type="text/javascript" src="legend.js"></script>
 		<script type="text/javascript" src="coolclock/excanvas.js"></script>
 		<script type="text/javascript" src="coolclock/coolclock.js"></script>
 		<script type="text/javascript" src="coolclock/moreskins.js"></script>
@@ -38,6 +39,8 @@
 
 		<div id="map_container">
 			<div id="map_canvas"></div>
+			<div id="altitude_legend"></div>
+			<div id="range_legend"></div>
 		</div>
 		<div id="sidebar_container">
 			<div id="sidebar_canvas">
@@ -57,6 +60,12 @@
 				<div id="sudo_buttons">
 					<table width="100%">
                                           <tr>
+					    <td width="150" style="text-align: center;" class="pointer">
+					      [ <span onclick="toggleRings();">Rings</span> ]
+					    </td>
+					    <td width="150" style="text-align: center;" class="pointer">
+					      [ <span onclick="toggleColors();">Colors</span> ]
+					    </td>
 					    <td width="150" style="text-align: center;" class="pointer">
 					      [ <span onclick="resetMap();">Reset Map</span> ]
 					    </td>

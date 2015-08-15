@@ -292,6 +292,9 @@ function end_load_history() {
         window.setInterval(fetchData, RefreshInterval);
         window.setInterval(reaper, 60000);
 
+        if (SitePosition) refreshCircles(myMarker);
+        refresh_colored_altitude_zones();
+
         // And kick off one refresh immediately.
         fetchData();
 
@@ -451,13 +454,9 @@ function initialize_map() {
           title: SiteName,
           zIndex: -99999
         });
-        
-        if (SiteCircles) {
-            for (var i=0;i<SiteCirclesDistances.length;i++) {
-              drawCircle(marker, SiteCirclesDistances[i]); // in meters
-            }
+
+        myMarker = marker;
         }
-	}
 }
 
 // This looks for planes to reap out of the master Planes variable
@@ -812,7 +811,7 @@ function resetMap() {
 	selectPlaneByHex(null,false);
 }
 
-function drawCircle(marker, distance) {
+function drawCircle(marker, distance, strkweight, strkcolor) {
     if (typeof distance === 'undefined') {
         return false;
         
@@ -831,8 +830,10 @@ function drawCircle(marker, distance) {
       map: GoogleMap,
       radius: distance, // In meters
       fillOpacity: 0.0,
-      strokeWeight: 1,
+      strokeWeight: strkweight,
+      strokeColor: strkcolor,
       strokeOpacity: 0.3
     });
     circle.bindTo('center', marker, 'position');
+    return circle;
 }
