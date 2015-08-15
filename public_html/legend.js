@@ -13,7 +13,7 @@ var myMarker = null;
 var CirclesArray = [];
 
 function getAltitudeZoneColors(NumberOfZones) {
-    html = '';
+    var html = '';
 
 	if (!ShowAircraftColorLegend)
 	    return html;
@@ -41,15 +41,15 @@ function getAltitudeZoneColors(NumberOfZones) {
 		var high_altitude_zone_border = Math.round(((altitude_zone + 1) * zone)) - 1;
 
 		// color
-		s = ColorByAlt.air.s;
-		l = ColorByAlt.air.l;
+		var s = ColorByAlt.air.s;
+		var l = ColorByAlt.air.l;
 
 		if (Metric) altitude = Math.round(altitude * 3.2828);
 
 		// find the pair of points the current altitude lies between,
 		// and interpolate the hue between those points
 		var hpoints = ColorByAlt.air.h;
-		h = hpoints[0].val;
+		var h = hpoints[0].val;
 		for (var i = hpoints.length-1; i >= 0; --i) {
 			if (altitude > hpoints[i].alt) {
 				if (i == hpoints.length-1) {
@@ -76,8 +76,7 @@ function getAltitudeZoneColors(NumberOfZones) {
 		var zone_color = 'hsl(' + h.toFixed(0) + ',' + s.toFixed(0) + '%,' + l.toFixed(0) + '%)';
 
 		// Create HTML code
-		li='<li class="color" style="background-color:'+zone_color+';">'+low_altitude_zone_border+'-'+high_altitude_zone_border+unittype+'</li>';
-		html=html+li;
+		html=html+'<li class="color" style="background-color:'+zone_color+';">'+low_altitude_zone_border+'-'+high_altitude_zone_border+unittype+'</li>';
 	}
 
 	return html; 
@@ -125,7 +124,7 @@ function refreshCircles(marker) {
     for (var i=0; i < SiteCircle.length; i++) 
         if (ShowSiteCircles) {
             if (!CirclesArray[i])
-                CirclesArray[i] = drawCircle(marker, SiteCircle[i].distance, SiteCircle[i].stroke, SiteCircle[i].color);
+                CirclesArray[i] = drawCircle(marker, SiteCircle[i].distance, SiteCircle[i].strokeweight, SiteCircle[i].color);
         } else {
             if (CirclesArray[i]) {
                 CirclesArray[i].setMap(null);

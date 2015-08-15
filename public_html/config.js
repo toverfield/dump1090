@@ -103,11 +103,11 @@ ShowSiteCircles = true; // true to show circles (only shown if the center marker
 ShowSiteCirclesLegend = true ; // true to show circle distance legend
 // Circle radius in nautical miles or km (depending settings value 'Metric')
 SiteCircle = [
-        { distance:  50, stroke: 1, color: "black" },
-        { distance: 100, stroke: 2, color: "green" },
-        { distance: 150, stroke: 1, color: "blue" },
-        { distance: 200, stroke: 2, color: "red" },
-        { distance: 250, stroke: 2, color: "magenta" }
+        { distance:  50, strokeweight: 1, color: "black" },
+        { distance: 100, strokeweight: 2, color: "green" },
+        { distance: 150, strokeweight: 1, color: "blue" },
+        { distance: 200, strokeweight: 2, color: "red" },
+        { distance: 250, strokeweight: 2, color: "purple" }
 ];
 
 // Show the clocks at the top of the righthand pane? You can disable the clocks if you want here
