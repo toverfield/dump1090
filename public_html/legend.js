@@ -1,3 +1,13 @@
+// -*- mode: javascript; indent-tabs-mode: nil; c-basic-offset: 8 -*-
+"use strict";
+
+//
+// Portions of this file were originally posted by 'tedsluis' in the following post.
+//
+// http://discussions.flightaware.com/ads-b-flight-tracking-f21/altitude-color-legend-for-the-dump1090-mutability-v1-15-dev-t35805.html
+//
+// I 'toverfield' added another legend for the range circles and I added toggle controls for both legends. I also made the range circles easier to configure.
+//
 
 var myMarker = null;
 var CirclesArray = [];
