@@ -24,6 +24,7 @@ var PlaneRowTemplate = null;
 
 var TrackedAircraft = 0;
 var TrackedAircraftPositions = 0;
+var TrackedAircraftPositionsMLAT = 0;
 var TrackedHistorySize = 0;
 
 var SitePosition = null;
@@ -74,7 +75,12 @@ function processReceiverUpdate(data) {
                                 plane.tr.cells[0].textContent = hex.substring(1);
                                 $(plane.tr).css('font-style', 'italic');
                         } else {
-                                plane.tr.cells[0].textContent = hex;
+                                // attach the country flag
+                                plane.flag = ICAOLookup(parseInt(hex, 16));
+                                if (plane.flag !== null) 
+                                        plane.tr.cells[0].innerHTML = hex + '<img style="float:right" src="' + flag_dir + '/' + plane.flag.icon_fn + '" width=20 height=12 title="' + plane.flag.Country + '">';
+                                else
+                                        plane.tr.cells[0].textContent = hex;
                         }
 
                         plane.tr.addEventListener('click', selectPlaneByHex.bind(undefined,hex,false));
@@ -177,6 +183,8 @@ function initialize() {
         }
 
         $("#loader").removeClass("hidden");
+
+        ICAO_Codes.sort(function(a,b) {return a.start - b.start});
         
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
@@ -529,6 +537,7 @@ function refreshSelected() {
                 $('#dump1090_version').text(Dump1090Version);
                 $('#dump1090_total_ac').text(TrackedAircraft);
                 $('#dump1090_total_ac_positions').text(TrackedAircraftPositions);
+                $('#dump1090_total_ac_positionsMLAT').text(TrackedAircraftPositionsMLAT);
                 $('#dump1090_total_history').text(TrackedHistorySize);
 
                 if (MessageRate !== null) {
@@ -585,13 +594,22 @@ function refreshSelected() {
         $('#selected_speed').text(format_speed_long(selected.speed));
         $('#selected_icao').text(selected.icao.toUpperCase());
         $('#airframes_post_icao').attr('value',selected.icao);
-	$('#selected_track').text(format_track_long(selected.track));
+        $('#selected_track').text(format_track_long(selected.track));
 
         if (selected.seen <= 1) {
                 $('#selected_seen').text('now');
         } else {
                 $('#selected_seen').text(selected.seen.toFixed(1) + 's');
         }
+
+        // add the country and flag
+        if (selected.flag !== null) {
+                $('#selected_country').html('<img src="' + flag_dir + '/' + selected.flag.icon_fn + '" height=12 width=20 title="' + selected.flag.Country + '">' + NBSP + selected.flag.Country);
+        }
+        else {
+                $('#selected_country').text('Unrecognized');
+        }
+
 
 	if (selected.position === null) {
                 $('#selected_position').text('n/a');
@@ -622,6 +640,7 @@ function refreshTableInfo() {
 
         TrackedAircraft = 0
         TrackedAircraftPositions = 0
+        TrackedAircraftPositionsMLAT = 0
         TrackedHistorySize = 0
 
         for (var i = 0; i < PlanesOrdered.length; ++i) {
@@ -635,9 +654,11 @@ function refreshTableInfo() {
 
 		        if (tableplane.position !== null && tableplane.seen_pos < 60) {
                                 ++TrackedAircraftPositions;
-                                if (tableplane.position_from_mlat)
+                                if (tableplane.position_from_mlat) {
                                         classes += " mlat";
-				else
+                                        ++TrackedAircraftPositionsMLAT;
+                                }
+				                else
                                         classes += " vPosition";
 			}
 			if (tableplane.icao == SelectedPlane)
@@ -812,13 +833,10 @@ function resetMap() {
 }
 
 function drawCircle(marker, distance, strkweight, strkcolor) {
-    if (typeof distance === 'undefined') {
+    if (typeof distance === 'undefined')
         return false;
-        
-        if (!(!isNaN(parseFloat(distance)) && isFinite(distance)) || distance < 0) {
-            return false;
-        }
-    }
+    if (!(!isNaN(parseFloat(distance)) && isFinite(distance)) || distance < 0)
+	    return false;
     
     distance *= 1000.0;
     if (!Metric) {
@@ -837,3 +855,4 @@ function drawCircle(marker, distance, strkweight, strkcolor) {
     circle.bindTo('center', marker, 'position');
     return circle;
 }
+

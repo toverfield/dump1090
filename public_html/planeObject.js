@@ -7,6 +7,7 @@ function PlaneObject(icao) {
 	this.squawk    = null;
 	this.selected  = false;
         this.category  = null;
+        this.flag      = null;
 
 	// Basic location information
         this.altitude  = null;
@@ -41,7 +42,8 @@ function PlaneObject(icao) {
         // request metadata
         this.registration = null;
         this.icaotype = null;
-        getAircraftData(this.icao).done(function(data) {
+        if (this.icao[0] !== '~')
+            getAircraftData(this.icao).done(function(data) {
                 if ("r" in data) {
                         this.registration = data.r;
                 }
@@ -53,7 +55,7 @@ function PlaneObject(icao) {
                 if (this.selected) {
 		        refreshSelected();
                 }
-        }.bind(this));
+            }.bind(this));
 }
 
 // Appends data to the running track so we can get a visual tail on the plane
@@ -379,9 +381,27 @@ PlaneObject.prototype.updateMarker = function(moved) {
 	}
         
 	// Setting the marker title
-        var title = (this.flight === null || this.flight.length == 0) ? this.icao : (this.flight+' ('+this.icao+')');
-        if (title !== this.marker.title)
-	        this.marker.setTitle(title);
+        var title = 'ICAO:\t\t' + this.icao + '\n'
+                  + this.addtoTitle('Flight:\t\t', this.flight)
+                  + this.addtoTitle('Registration:\t', this.registration)
+                  + this.addtoTitle('Type:\t\t', this.icaotype)
+                  + this.addtoTitle('Squawk:\t\t', this.squawk)
+                  + this.addtoTitle('Speed:\t\t', format_speed_long(this.speed))
+                  + this.addtoTitle('Altitude:\t\t', format_altitude_long(this.altitude))
+                  + this.addtoTitle('Distance:\t\t', format_distance_long(this.sitedist))
+                  + 'Track:\t\t' + format_track_long(this.track) + '\n'
+                  + 'Messages:\t' + this.messages + '\n'
+                  + 'Position:\t\t' + (this.position_from_mlat ? 'Mode-S MLAT' : 'ADS-B');
+
+    if (title !== this.marker.title)
+        this.marker.setTitle(title);
+};
+
+PlaneObject.prototype.addtoTitle = function (name, value) {
+        if (value && value.length)
+                return name + value + '\n';
+        else
+                return '';
 };
 
 // Update our planes tail line,

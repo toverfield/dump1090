@@ -103,11 +103,13 @@ ShowSiteCircles = true; // true to show circles (only shown if the center marker
 ShowSiteCirclesLegend = true ; // true to show circle distance legend
 // Circle radius in nautical miles or km (depending settings value 'Metric')
 SiteCircle = [
-        { distance:  50, strokeweight: 1, color: "black" },
-        { distance: 100, strokeweight: 2, color: "green" },
-        { distance: 150, strokeweight: 1, color: "blue" },
-        { distance: 200, strokeweight: 2, color: "red" },
-        { distance: 250, strokeweight: 2, color: "purple" }
+        { distance:  50, strokeweight: 2, color: "black" },
+        { distance: 100, strokeweight: 2, color: "OrangeRed" },
+        { distance: 150, strokeweight: 2, color: "red" },
+        { distance: 200, strokeweight: 2, color: "purple" },
+        { distance: 250, strokeweight: 2, color: "green" },
+        { distance: 300, strokeweight: 3, color: "DeepSkyBlue" },
+        { distance: 350, strokeweight: 2, color: "navy" }
 ];
 
 // Show the clocks at the top of the righthand pane? You can disable the clocks if you want here
@@ -115,3 +117,6 @@ ShowClocks = true;
 
 // Controls page title, righthand pane when nothing is selected
 PageName = "dump1090-mutability";
+
+// Path to country flags subfolder
+flag_dir = "flags-tiny";

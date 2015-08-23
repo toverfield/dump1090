@@ -88,8 +88,8 @@ function getRangeRingsLegend() {
     if (!ShowSiteCircles) return html;
     if (!ShowSiteCirclesLegend) return html;
 
-    var unittype = ' nm';
-    if (Metric) unittype = ' km';
+    var unittype = NBSP + 'NM';
+    if (Metric) unittype = NBSP + 'km';
 
     // Create HTML code
 

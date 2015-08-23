@@ -32,7 +32,7 @@ div#loader { z-index: 99; position: absolute; left: 0; top: 0; bottom: 0; right:
 .plane_table_row { cursor: pointer; }
 .hidden { display: none; }
 
-.infoblock_heading    { font-size: larger; }
+.infoblock_heading    { font-size: larger; height: 31px; }
 .infoblock_heading a  { text-decoration: none; color: blue; font-size: x-small;}
 .infoblock_body       { font-size: small; }
 
