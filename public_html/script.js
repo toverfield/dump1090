@@ -555,6 +555,7 @@ function refreshSelected() {
         if (selected.flight !== null && selected.flight !== "") {
                 $('#selected_callsign').text(selected.flight);
                 $('#selected_links').css('display','inline');
+                $('#selected_gi_link').attr('href','http://google.com/search?tbm=isch&q='+selected.registration);
                 $('#selected_fr24_link').attr('href','http://fr24.com/'+selected.flight);
                 $('#selected_flightstats_link').attr('href','http://www.flightstats.com/go/FlightStatus/flightStatusByFlight.do?flightNumber='+selected.flight);
                 $('#selected_flightaware_link').attr('href','http://flightaware.com/live/flight/'+selected.flight);
