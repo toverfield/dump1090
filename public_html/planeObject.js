@@ -386,9 +386,9 @@ PlaneObject.prototype.updateMarker = function(moved) {
                   + this.addtoTitle('Registration:\t', this.registration)
                   + this.addtoTitle('Type:\t\t', this.icaotype)
                   + this.addtoTitle('Squawk:\t\t', this.squawk)
-                  + this.addtoTitle('Speed:\t\t', format_speed_long(this.speed))
-                  + this.addtoTitle('Altitude:\t\t', format_altitude_long(this.altitude))
-                  + this.addtoTitle('Distance:\t\t', format_distance_long(this.sitedist))
+                  + 'Speed:\t\t' + format_speed_long(this.speed) + '\n'
+                  + 'Altitude:\t\t' + format_altitude_long(this.altitude) + '\n'
+                  + 'Distance:\t\t' + format_distance_long(this.sitedist) + '\n'
                   + 'Track:\t\t' + format_track_long(this.track) + '\n'
                   + 'Messages:\t' + this.messages + '\n'
                   + 'Position:\t\t' + (this.position_from_mlat ? 'Mode-S MLAT' : 'ADS-B');

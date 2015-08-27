@@ -76,7 +76,7 @@ function getAltitudeZoneColors(NumberOfZones) {
 		var zone_color = 'hsl(' + h.toFixed(0) + ',' + s.toFixed(0) + '%,' + l.toFixed(0) + '%)';
 
 		// Create HTML code
-		html=html+'<li class="color" style="background-color:'+zone_color+';">'+low_altitude_zone_border+'-'+high_altitude_zone_border+unittype+'</li>';
+		html='<li class="color" style="background-color:'+zone_color+';">'+low_altitude_zone_border+'-'+high_altitude_zone_border+unittype+'</li>' + html;
 	}
 
 	return html; 

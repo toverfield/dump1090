@@ -7,6 +7,7 @@ var Planes        = {};
 var PlanesOrdered = [];
 var SelectedPlane = null;
 var FollowSelected = false;
+var displayedFlag = null;
 
 var SpecialSquawks = {
         '7500' : { cssClass: 'squawk7500', markerColor: 'rgb(255, 85, 85)', text: 'Aircraft Hijacking' },
@@ -583,6 +584,18 @@ function refreshSelected() {
                 emerg.className = 'hidden';
         }
 
+        // add the country and flag
+        if (selected.flag !== null) {
+                if (displayedFlag !== selected.flag) { // Don't blink the flag
+		            displayedFlag = selected.flag;
+                    $('#selected_country').html('<img src="' + flag_dir + '/' + selected.flag.icon_fn + '" height=12 width=20 title="' + selected.flag.Country + '">' + NBSP + selected.flag.Country);
+				}
+        }
+        else {
+                displayedFlag = null;
+                $('#selected_country').text('Unrecognized');
+        }
+
         $("#selected_altitude").text(format_altitude_long(selected.altitude, selected.vert_rate));
 
         if (selected.squawk === null || selected.squawk === '0000') {
@@ -601,15 +614,6 @@ function refreshSelected() {
         } else {
                 $('#selected_seen').text(selected.seen.toFixed(1) + 's');
         }
-
-        // add the country and flag
-        if (selected.flag !== null) {
-                $('#selected_country').html('<img src="' + flag_dir + '/' + selected.flag.icon_fn + '" height=12 width=20 title="' + selected.flag.Country + '">' + NBSP + selected.flag.Country);
-        }
-        else {
-                $('#selected_country').text('Unrecognized');
-        }
-
 
 	if (selected.position === null) {
                 $('#selected_position').text('n/a');
