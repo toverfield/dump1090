@@ -3,11 +3,11 @@
 function PlaneObject(icao) {
 	// Info about the plane
         this.icao      = icao;
+        this.icaorange = findICAORange(icao);
         this.flight    = null;
 	this.squawk    = null;
 	this.selected  = false;
         this.category  = null;
-        this.flag      = null;
 
 	// Basic location information
         this.altitude  = null;

@@ -120,5 +120,8 @@ ClockSkin = "swissRail";
 // Controls page title, righthand pane when nothing is selected
 PageName = "dump1090-mutability";
 
-// Path to country flags subfolder
+// Show country flags by ICAO addresses?
+ShowFlags = true;
+
+// Path to country flags (can be a relative or absolute URL; include a trailing /)
 FlagPath = "flags-tiny/";

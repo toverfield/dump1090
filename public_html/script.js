@@ -7,7 +7,6 @@ var Planes        = {};
 var PlanesOrdered = [];
 var SelectedPlane = null;
 var FollowSelected = false;
-var displayedFlag = null;
 
 var SpecialSquawks = {
         '7500' : { cssClass: 'squawk7500', markerColor: 'rgb(255, 85, 85)', text: 'Aircraft Hijacking' },
@@ -74,17 +73,21 @@ function processReceiverUpdate(data) {
 		} else {
 			plane = new PlaneObject(hex);
                         plane.tr = PlaneRowTemplate.cloneNode(true);
+
                         if (hex[0] === '~') {
                                 // Non-ICAO address
                                 plane.tr.cells[0].textContent = hex.substring(1);
                                 $(plane.tr).css('font-style', 'italic');
                         } else {
-                                // attach the country flag
-                                plane.flag = ICAOLookup(parseInt(hex, 16));
-                                if (plane.flag !== null) 
-                                        plane.tr.cells[0].innerHTML = hex + '<img style="float:right" src="' + FlagPath + plane.flag.icon_fn + '" width=20 height=12 title="' + plane.flag.Country + '">';
-                                else
-                                        plane.tr.cells[0].textContent = hex;
+                                plane.tr.cells[0].textContent = hex;
+                        }
+
+                        // set flag image if available
+                        if (ShowFlags && plane.icaorange.flag_image !== null) {
+                                $('img', plane.tr.cells[1]).attr('src', FlagPath + plane.icaorange.flag_image);
+                                $('img', plane.tr.cells[1]).attr('title', plane.icaorange.country);
+                        } else {
+                                $('img', plane.tr.cells[1]).css('display', 'none');
                         }
 
                         plane.tr.addEventListener('click', selectPlaneByHex.bind(undefined,hex,false));
@@ -193,7 +196,9 @@ function initialize() {
 
         $("#loader").removeClass("hidden");
 
-        ICAO_Codes.sort(function(a,b) {return a.start - b.start});
+        // Sort the ICAO tables so we can use a binary search.
+        ICAO_Ranges.sort(function(a,b) {return a.start - b.start});
+        ICAO_U_Ranges.sort(function(a,b) {return a.start - b.start});
         
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
@@ -309,7 +314,8 @@ function end_load_history() {
         window.setInterval(fetchData, RefreshInterval);
         window.setInterval(reaper, 60000);
 
-        if (SitePosition) refreshCircles(myMarker);
+        if (SitePosition)
+	        refreshCircles(myMarker);
         refresh_colored_altitude_zones();
 
         // And kick off one refresh immediately.
@@ -330,9 +336,17 @@ function initialize_map() {
                 sortByDistance();
         } else {
 	        SitePosition = null;
-                PlaneRowTemplate.cells[5].style.display = 'none'; // hide distance column
+                PlaneRowTemplate.cells[6].style.display = 'none'; // hide distance column
                 document.getElementById("distance").style.display = 'none'; // hide distance header
                 sortByAltitude();
+        }
+
+        // Maybe hide flag info
+        if (!ShowFlags) {
+                PlaneRowTemplate.cells[1].style.display = 'none'; // hide flag column
+                document.getElementById("flag").style.display = 'none'; // hide flag header
+                document.getElementById("infoblock_country").style.display = 'none'; // hide country row
+                document.getElementById("infoblock_country_spacer").style.display = 'none'; // hide country row
         }
 
 	// Make a list of all the available map IDs
@@ -573,16 +587,15 @@ function refreshSelected() {
                 $('#selected_links').css('display','none');
         }
 
-		if ($("#grippie").hasClass("fullscreen")) {
+        if ($("#grippie").hasClass("fullscreen")) {
                 $('#selected_plane').css('background-color', (selected.position_from_mlat ? '#a0a0ff' : '#a0ffa0'));
                 $("#selected_plane").css('display','block');
                 $("#selected_plane_detail").html(selected.marker.title.replace(/(?:\r\n|\r|\n)/g, '<br />'));
-		}
-		else {
+        } else {
                 $("#selected_plane").css('display','none');
-		}
+        }
 
-		if (selected.registration !== null) {
+        if (selected.registration !== null) {
                 $('#selected_registration').text(selected.registration);
         } else {
                 $('#selected_registration').text("");
@@ -602,18 +615,6 @@ function refreshSelected() {
                 emerg.className = 'hidden';
         }
 
-        // add the country and flag
-        if (selected.flag !== null) {
-                if (displayedFlag !== selected.flag) { // Don't blink the flag
-		            displayedFlag = selected.flag;
-                    $('#selected_country').html('<img src="' + FlagPath + selected.flag.icon_fn + '" height=12 width=20 title="' + selected.flag.Country + '">' + NBSP + selected.flag.Country);
-				}
-        }
-        else {
-                displayedFlag = null;
-                $('#selected_country').text('Unrecognized');
-        }
-
         $("#selected_altitude").text(format_altitude_long(selected.altitude, selected.vert_rate));
 
         if (selected.squawk === null || selected.squawk === '0000') {
@@ -625,12 +626,21 @@ function refreshSelected() {
         $('#selected_speed').text(format_speed_long(selected.speed));
         $('#selected_icao').text(selected.icao.toUpperCase());
         $('#airframes_post_icao').attr('value',selected.icao);
-        $('#selected_track').text(format_track_long(selected.track));
+	$('#selected_track').text(format_track_long(selected.track));
 
         if (selected.seen <= 1) {
                 $('#selected_seen').text('now');
         } else {
                 $('#selected_seen').text(selected.seen.toFixed(1) + 's');
+        }
+
+        $('#selected_country').text(selected.icaorange.country);
+        if (ShowFlags && selected.icaorange.flag_image !== null) {
+                $('#selected_flag').removeClass('hidden');
+                $('#selected_flag img').attr('src', FlagPath + selected.icaorange.flag_image);
+                $('#selected_flag img').attr('title', selected.icaorange.country);
+        } else {
+                $('#selected_flag').addClass('hidden');
         }
 
 	if (selected.position === null) {
@@ -692,17 +702,15 @@ function refreshTableInfo() {
 			}			                
 
                         // ICAO doesn't change
-                        tableplane.tr.cells[1].textContent = (tableplane.flight !== null ? tableplane.flight : "");
-                        tableplane.tr.cells[2].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");    	                
-                        tableplane.tr.cells[3].textContent = format_altitude_brief(tableplane.altitude, tableplane.vert_rate);
-                        tableplane.tr.cells[4].textContent = format_speed_brief(tableplane.speed);
-                        tableplane.tr.cells[5].textContent = format_distance_brief(tableplane.sitedist);			
-                        tableplane.tr.cells[6].textContent = format_track_brief(tableplane.track);
-                        tableplane.tr.cells[7].textContent = tableplane.messages;
-                        tableplane.tr.cells[8].textContent = tableplane.seen.toFixed(0);
-                
+                        tableplane.tr.cells[2].textContent = (tableplane.flight !== null ? tableplane.flight : "");
+                        tableplane.tr.cells[3].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");
+                        tableplane.tr.cells[4].textContent = format_altitude_brief(tableplane.altitude, tableplane.vert_rate);
+                        tableplane.tr.cells[5].textContent = format_speed_brief(tableplane.speed);
+                        tableplane.tr.cells[6].textContent = format_distance_brief(tableplane.sitedist);
+                        tableplane.tr.cells[7].textContent = format_track_brief(tableplane.track);
+                        tableplane.tr.cells[8].textContent = tableplane.messages;
+                        tableplane.tr.cells[9].textContent = tableplane.seen.toFixed(0);
                         tableplane.tr.className = classes;
-
 		}
 	}
 
@@ -743,6 +751,7 @@ function sortByDistance() { sortBy('sitedist',compareNumeric, function(x) { retu
 function sortByTrack()    { sortBy('track',   compareNumeric, function(x) { return x.track; }); }
 function sortByMsgs()     { sortBy('msgs',    compareNumeric, function(x) { return x.messages; }); }
 function sortBySeen()     { sortBy('seen',    compareNumeric, function(x) { return x.seen; }); }
+function sortByCountry()  { sortBy('country', compareAlpha,   function(x) { return x.icaorange.country; }); }
 
 var sortId = '';
 var sortCompare = null;
@@ -881,58 +890,55 @@ function drawCircle(marker, distance, strkweight, strkcolor) {
 // Bind grippie actions
 
 $(function() {
-	var handleClick = function(e) {
-		e.preventDefault();
+        var handleClick = function(e) {
+                e.preventDefault();
 
-		$("#sidebar_container").toggle();
-		$("#grippie").toggleClass("fullscreen");
-		if ($("#grippie").hasClass("fullscreen")) {
-		    $("#map_canvas").css("margin-right", "10px");
-		    $("#range_legend").css("right", "10px");
-		    $("#altitude_legend").css("right", "10px");
-		}
-		else {
-		    $("#map_canvas").css("margin-right", "420px");
-		    $("#range_legend").css("right", "420px");
-		    $("#altitude_legend").css("right", "420px");
-		}
-		google.maps.event.trigger(GoogleMap, "resize");		
-	};
-	
-	$("#grippie").click(handleClick);
+                $("#sidebar_container").toggle();
+                $("#grippie").toggleClass("fullscreen");
+                if ($("#grippie").hasClass("fullscreen")) {
+                        $("#map_canvas").css("margin-right", "10px");
+                        $("#range_legend").css("right", "10px");
+                        $("#altitude_legend").css("right", "10px");
+                } else {
+                        $("#map_canvas").css("margin-right", "420px");
+                        $("#range_legend").css("right", "420px");
+                        $("#altitude_legend").css("right", "420px");
+                }
+                google.maps.event.trigger(GoogleMap, "resize");		
+        };
+        $("#grippie").click(handleClick);
 });
 	
+// There is surely a better way to do this.
 function nextClock(db, key) {
-    var found = 0; 
-    for (var k in db) {
-        if (found) { 
-            return k; 
+        var found = false; 
+        for (var k in db) {
+                if (found)  
+                        return k; 
+                if (k == key)
+                        found = true;
         }
-        if (k == key) { 
-            found = 1;
-        }
-    }
-    for (var k in db)
-	    return k;
+        for (var k in db)
+             return k;
 }
 
 $(function() {
-	var handleClick = function(e) {
-		e.preventDefault();
+        var handleClick = function(e) {
+                e.preventDefault();
 
-        if (!ShowClocks) {
-                $('#timestamps').css('display','none');
-        } else {
-	            ClockSkin = nextClock(CoolClock.config.skins, ClockSkin);
-	            $("#ClockSkin").text(ClockSkin);
-                $("#clock_skin").css('display','block');
-				if (ClockTimeout)
-				    clearTimeout(ClockTimeout);
-                ClockTimeout = setTimeout(function () {$("#clock_skin").css('display','none'); ClockTimeout = null;}, 5000);
+                if (!ShowClocks) {
+                        $('#timestamps').css('display','none');
+                } else {
+                        ClockSkin = nextClock(CoolClock.config.skins, ClockSkin);
+                        $("#ClockSkin").text(ClockSkin);
+                        $("#clock_skin").css('display','block');
+                        if (ClockTimeout)
+                                clearTimeout(ClockTimeout);
+                        ClockTimeout = setTimeout(function () {$("#clock_skin").css('display','none'); ClockTimeout = null;}, 5000);
 
-                // Create the clocks.
-				createClocks();
-        }
-	};
-	$("#timestamps").click(handleClick);
+                        // Create the clocks.
+                        createClocks();
+                 }
+        };
+        $("#timestamps").click(handleClick);
 });
