@@ -40,7 +40,7 @@ function ICAOLookup(icao) {
 }
 
 // Declare ICAO registration address ranges and country
-// install the flag images in flag_dir subdirectory. 
+// install the flag images in FlagPath subdirectory. 
 var ICAO_Codes = [
 {start:0x700000, end:0x701000, Country: "Afghanistan", icon_fn: "Afghanistan.png"}, 
 {start:0x501000, end:0x501400, Country: "Albania", icon_fn: "Albania.png"}, 

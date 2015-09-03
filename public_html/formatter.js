@@ -40,19 +40,19 @@ function format_altitude_brief(alt, vr) {
 		return "ground";
 	}
 	
-	if (Metric) {
-		alt_text = Math.round(alt / 3.2828) + NBSP; // Altitude to meters
+	if (MetricAlt) {
+		alt_text = Math.round(alt / 3.2828); // Altitude to meters
 	} else {
-		alt_text = Math.round(alt) + NBSP;
+		alt_text = Math.round(alt);
 	}
 	
 	// Vertical Rate Triangle
 	if (vr > 128){
-		return alt_text + UP_TRIANGLE;
+		return UP_TRIANGLE + NBSP + alt_text;
 	} else if (vr < -128){
-		return alt_text + DOWN_TRIANGLE;
+		return DOWN_TRIANGLE + NBSP + alt_text;
 	} else {
-		return alt_text + NBSP;
+		return NBSP + NBSP + alt_text;
 	}
 }
 
@@ -74,11 +74,11 @@ function format_altitude_long(alt, vr) {
 	}
 
 	// Primary unit
-	alt_text = _alt_to_unit(alt, Metric);
+	alt_text = _alt_to_unit(alt, MetricAlt);
 
 	// Secondary unit
 	if (ShowOtherUnits) {
-		alt_text = alt_text + ' | ' + _alt_to_unit(alt, !Metric);
+		alt_text = alt_text + ' | ' + _alt_to_unit(alt, !MetricAlt);
 	}
 	
 	if (vr > 128) {
@@ -96,7 +96,7 @@ function format_speed_brief(speed) {
 		return "";
 	}
 	
-	if (Metric) {
+	if (MetricSpd) {
 		return Math.round(speed * 1.852); // knots to kilometers per hour
 	} else {
 		return Math.round(speed); // knots
@@ -118,11 +118,11 @@ function format_speed_long(speed) {
 	}
 
 	// Primary unit
-	var speed_text = _speed_to_unit(speed, Metric);
+	var speed_text = _speed_to_unit(speed, MetricSpd);
 
 	// Secondary unit
 	if (ShowOtherUnits) {
-		speed_text = speed_text + ' | ' + _speed_to_unit(speed, !Metric);
+		speed_text = speed_text + ' | ' + _speed_to_unit(speed, !MetricSpd);
 	}
 	
 	return speed_text;
@@ -134,7 +134,7 @@ function format_distance_brief(dist) {
 		return "";
 	}
 
-	if (Metric) {
+	if (MetricDst) {
 		return (dist/1000).toFixed(1); // meters to kilometers
 	} else {
 		return (dist/1852).toFixed(1); // meters to nautocal miles
@@ -156,11 +156,11 @@ function format_distance_long(dist) {
 	}
 
 	// Primary unit
-	var dist_text = _dist_to_unit(dist, Metric);
+	var dist_text = _dist_to_unit(dist, MetricDst);
 
 	// Secondary unit
 	if (ShowOtherUnits) {
-		dist_text = dist_text + ' | ' + _dist_to_unit(dist, !Metric);
+		dist_text = dist_text + ' | ' + _dist_to_unit(dist, !MetricDst);
 	}
 
 	return dist_text;

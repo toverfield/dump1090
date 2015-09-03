@@ -30,7 +30,10 @@ var TrackedHistorySize = 0;
 
 var SitePosition = null;
 
+var ClockSkin;
+var UTCClock = null;
 var ReceiverClock = null;
+var ClockTimeout = null;
 
 var LastReceiverTimestamp = 0;
 var StaleReceiverCount = 0;
@@ -79,7 +82,7 @@ function processReceiverUpdate(data) {
                                 // attach the country flag
                                 plane.flag = ICAOLookup(parseInt(hex, 16));
                                 if (plane.flag !== null) 
-                                        plane.tr.cells[0].innerHTML = hex + '<img style="float:right" src="' + flag_dir + '/' + plane.flag.icon_fn + '" width=20 height=12 title="' + plane.flag.Country + '">';
+                                        plane.tr.cells[0].innerHTML = hex + '<img style="float:right" src="' + FlagPath + plane.flag.icon_fn + '" width=20 height=12 title="' + plane.flag.Country + '">';
                                 else
                                         plane.tr.cells[0].textContent = hex;
                         }
@@ -145,6 +148,34 @@ function fetchData() {
         });
 }
 
+function createClocks() {
+
+		UTCClock = new CoolClock({
+			canvasId:       "utcclock",
+			skinId:         ClockSkin,
+			displayRadius:  40,
+			showSecondHand: true,
+			gmtOffset:      "0", // this has to be a string!
+			showDigital:    false,
+			logClock:       false,
+			logClockRev:    false
+		});
+
+		ReceiverClock = new CoolClock({
+			canvasId:       "receiverclock",
+			skinId:         ClockSkin,
+			displayRadius:  40,
+			showSecondHand: true,
+			gmtOffset:      null,
+			showDigital:    false,
+			logClock:       false,
+			logClockRev:    false
+		});
+
+        // disable ticking on the receiver clock, we will update it ourselves
+        ReceiverClock.tick = (function(){})
+}
+
 var PositionHistorySize = 0;
 function initialize() {
         // Set page basics
@@ -157,30 +188,7 @@ function initialize() {
                 $('#timestamps').css('display','none');
         } else {
                 // Create the clocks.
-		new CoolClock({
-			canvasId:       "utcclock",
-			skinId:         "classic",
-			displayRadius:  40,
-			showSecondHand: true,
-			gmtOffset:      "0", // this has to be a string!
-			showDigital:    false,
-			logClock:       false,
-			logClockRev:    false
-		});
-
-		ReceiverClock = new CoolClock({
-			canvasId:       "receiverclock",
-			skinId:         "classic",
-			displayRadius:  40,
-			showSecondHand: true,
-			gmtOffset:      null,
-			showDigital:    false,
-			logClock:       false,
-			logClockRev:    false
-		});
-
-                // disable ticking on the receiver clock, we will update it ourselves
-                ReceiverClock.tick = (function(){})
+				createClocks();
         }
 
         $("#loader").removeClass("hidden");
@@ -503,7 +511,7 @@ function refreshPageTitle() {
         var subtitle = "";
 
         if (PlaneCountInTitle) {
-                subtitle += TrackedAircraftPositions + '/' + TrackedAircraft;
+		subtitle += TrackedAircraft + '/' + TrackedAircraftPositions + '/' + TrackedAircraftPositionsMLAT;	
         }
 
         if (MessageRateInTitle) {
@@ -534,6 +542,7 @@ function refreshSelected() {
         
         if (!selected) {
                 $('#selected_infoblock').css('display','none');
+                $('#selected_plane').css('display','none');
                 $('#dump1090_infoblock').css('display','block');
                 $('#dump1090_version').text(Dump1090Version);
                 $('#dump1090_total_ac').text(TrackedAircraft);
@@ -564,7 +573,16 @@ function refreshSelected() {
                 $('#selected_links').css('display','none');
         }
 
-        if (selected.registration !== null) {
+		if ($("#grippie").hasClass("fullscreen")) {
+                $('#selected_plane').css('background-color', (selected.position_from_mlat ? '#a0a0ff' : '#a0ffa0'));
+                $("#selected_plane").css('display','block');
+                $("#selected_plane_detail").html(selected.marker.title.replace(/(?:\r\n|\r|\n)/g, '<br />'));
+		}
+		else {
+                $("#selected_plane").css('display','none');
+		}
+
+		if (selected.registration !== null) {
                 $('#selected_registration').text(selected.registration);
         } else {
                 $('#selected_registration').text("");
@@ -588,7 +606,7 @@ function refreshSelected() {
         if (selected.flag !== null) {
                 if (displayedFlag !== selected.flag) { // Don't blink the flag
 		            displayedFlag = selected.flag;
-                    $('#selected_country').html('<img src="' + flag_dir + '/' + selected.flag.icon_fn + '" height=12 width=20 title="' + selected.flag.Country + '">' + NBSP + selected.flag.Country);
+                    $('#selected_country').html('<img src="' + FlagPath + selected.flag.icon_fn + '" height=12 width=20 title="' + selected.flag.Country + '">' + NBSP + selected.flag.Country);
 				}
         }
         else {
@@ -843,7 +861,7 @@ function drawCircle(marker, distance, strkweight, strkcolor) {
 	    return false;
     
     distance *= 1000.0;
-    if (!Metric) {
+    if (!MetricDst) {
         distance *= 1.852;
     }
     
@@ -860,3 +878,61 @@ function drawCircle(marker, distance, strkweight, strkcolor) {
     return circle;
 }
 
+// Bind grippie actions
+
+$(function() {
+	var handleClick = function(e) {
+		e.preventDefault();
+
+		$("#sidebar_container").toggle();
+		$("#grippie").toggleClass("fullscreen");
+		if ($("#grippie").hasClass("fullscreen")) {
+		    $("#map_canvas").css("margin-right", "10px");
+		    $("#range_legend").css("right", "10px");
+		    $("#altitude_legend").css("right", "10px");
+		}
+		else {
+		    $("#map_canvas").css("margin-right", "420px");
+		    $("#range_legend").css("right", "420px");
+		    $("#altitude_legend").css("right", "420px");
+		}
+		google.maps.event.trigger(GoogleMap, "resize");		
+	};
+	
+	$("#grippie").click(handleClick);
+});
+	
+function nextClock(db, key) {
+    var found = 0; 
+    for (var k in db) {
+        if (found) { 
+            return k; 
+        }
+        if (k == key) { 
+            found = 1;
+        }
+    }
+    for (var k in db)
+	    return k;
+}
+
+$(function() {
+	var handleClick = function(e) {
+		e.preventDefault();
+
+        if (!ShowClocks) {
+                $('#timestamps').css('display','none');
+        } else {
+	            ClockSkin = nextClock(CoolClock.config.skins, ClockSkin);
+	            $("#ClockSkin").text(ClockSkin);
+                $("#clock_skin").css('display','block');
+				if (ClockTimeout)
+				    clearTimeout(ClockTimeout);
+                ClockTimeout = setTimeout(function () {$("#clock_skin").css('display','none'); ClockTimeout = null;}, 5000);
+
+                // Create the clocks.
+				createClocks();
+        }
+	};
+	$("#timestamps").click(handleClick);
+});

@@ -43,6 +43,8 @@
 			<div id="altitude_legend"></div>
 			<div id="range_legend"></div>
 		</div>
+        <div id="grippie">
+        </div>
 		<div id="sidebar_container">
 			<div id="sidebar_canvas">
 				<div id="timestamps" style="align: center">
@@ -51,6 +53,7 @@
 					    <td align="center"> <canvas id="utcclock"></canvas> </td>
 					    <td align="center"> <canvas id="receiverclock"></canvas> </td>
 					  </tr>
+					    <div id="clock_skin" class="hidden" align=left colspan=2>ClockSkin=<span id="ClockSkin">n/a</span></div>
 
                                           <tr>
 					    <td align="center">UTC</td>
@@ -199,6 +202,10 @@
                                 </div>
 			</div>
 		</div>
+		<div id="selected_plane" class="hidden">
+            <span id="selected_plane_detail"></span>
+		</div>
+
 		<div id="SpecialSquawkWarning" class="hidden">
 		    <b>Squawk 7x00 is reported and shown.</b><br>
             This is most likely an error in receiving or decoding.<br>

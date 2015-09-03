@@ -17,7 +17,9 @@ MessageRateInTitle = false;
 // and in the detailed plane info. If ShowOtherUnits is true,
 // then the other unit will also be shown in the detailed plane
 // info.
-Metric = false;
+MetricAlt = false;
+MetricSpd = false;
+MetricDst = false;
 ShowOtherUnits = true;
 
 // -- Map settings ----------------------------------------
@@ -88,20 +90,18 @@ ColorByAlt = {
 //         stale :    { h: 0, s: 0, l: +30 }
 // };
 
-// -- Display aircraft in color depending on their altitude
-ShowAltitudesByColor = true; // true or false
-// -- Display aircraft color legend
-ShowAircraftColorLegend = true; // true or false
-// Number of altitude zones displayed
-NumberOfAltitudeZones = 27;
-// Maximum altitude in meters.
-MaxAltitudeMeters = 13500;
-// Maximum altitude in feet.
-MaxAltitudeFeet = 40500;
+// -- Aircraft coloring by altitude options --------------
+ShowAltitudesByColor = true;    // true or false -- Color the aircraft markers by altitude
+ShowAircraftColorLegend = true; // true or false -- Display aircraft color legend
+AltitudeColorZones = [
+        { alt:      0, step: 1000 },  // altitude in feet or meters (depending on 'MetricAlt')
+        { alt:  18000, step: 2000 },  // step is altitude increment to use
+        { alt:  42000, step: 0 }      // -- top altitude is marked by step value of '0'
+];
 
 ShowSiteCircles = true; // true to show circles (only shown if the center marker is shown)
-ShowSiteCirclesLegend = true ; // true to show circle distance legend
-// Circle radius in nautical miles or km (depending settings value 'Metric')
+ShowSiteCirclesLegend = true; // true to show circle distance legend
+// Circle radius in nautical miles or km (depending on settings value 'MetricDst')
 SiteCircle = [
         { distance:  50, strokeweight: 2, color: "black" },
         { distance: 100, strokeweight: 2, color: "OrangeRed" },
@@ -112,11 +112,13 @@ SiteCircle = [
         { distance: 350, strokeweight: 2, color: "navy" }
 ];
 
-// Show the clocks at the top of the righthand pane? You can disable the clocks if you want here
+// Show the clocks at the top of the righthand pane. You can disable the clocks if you want here
+// Click on clocks to change to next available skin.
 ShowClocks = true;
+ClockSkin = "swissRail";
 
 // Controls page title, righthand pane when nothing is selected
 PageName = "dump1090-mutability";
 
 // Path to country flags subfolder
-flag_dir = "flags-tiny";
+FlagPath = "flags-tiny/";
